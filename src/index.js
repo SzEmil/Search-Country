@@ -1,69 +1,48 @@
 'use strict';
 import './css/styles.css';
 import debounce from 'lodash.debounce';
+import Notiflix from 'notiflix';
+import { fetchUsers } from './fetchCountries';
 
 const inputCountry = document.querySelector('#search-box');
 const countryList = document.querySelector('.country-list');
 const countryInformation = document.querySelector('.country-info');
 const DEBOUNCE_DELAY = 300;
-let countryInfo = [];
 
-function fetchUsers(countryName) {
-  return fetch(`https://restcountries.com/v3.1/name/${countryName}`)
-    .then(response => {
-      if (!response) {
-        throw new Error(response.status);
-      }
-      return response.json();
-    })
-    .then(data => {
-      console.log(...data);
-      return data;
-    })
-    .catch(error => {
-      console.error(error);
-    });
+const drawCountryInfo = ({ name, capital, population, flags, languages }) => {
+  const parsedlanguages = languages.map(lang => lang.name).join(', ');
+  countryInformation.innerHTML = '';
+  countryList.innerHTML = '';
+  countryInformation.innerHTML = `<img src="${flags.svg}"><a>${name}</a><a>${capital}</a><a>${population}</a><a>${parsedlanguages}</a>`;
+};
+
+function drawCountryBlock(countries) {
+  const countriesArray = countries.map(({ name, flags }) => {
+    const countryCard = document.createElement('div');
+    countryCard.innerHTML = `<img src="${flags.svg}"><a>${name}</a>`;
+
+    return countryCard;
+  });
+
+  countryList.innerHTML = '';
+  countryInformation.innerHTML = '';
+  countryList.append(...countriesArray);
 }
 
 const inputHandler = () => {
   const country = inputCountry.value;
-  fetchUsers(country)
-    .then(countryArray => {
-      countryArray.map(({ name, population, flags }) => {
-        if (countryArray.length === 1) {
-          countryInformation.innerHTML = `<a>${name.common}</a><a>${population}</a><a>${name.common}</a>`;
-        }
-        if (countryArray.length > 1) {
-          let countryObj = {
-            name: name.common,
-            flag: flags.png,
-          };
-          countryInfo.push(countryObj);
-        }
-      });
-      return countryInfo;
-    })
-    .then(objectDataArray => {
-      console.log(objectDataArray);
-      objectDataArray.map(arrayData => {
-        drawCountryBlock(arrayData);
-      });
-    })
-    .catch(error => {
-      console.error(error);
-    });
+  fetchUsers(country).then(countries => {
+    if (countries.length > 10) {
+      Notiflix.Notify.info(
+        'Too many matches found. Please enter a more specific name.'
+      );
+      return;
+    }
+    if (countries.length === 1) {
+      return drawCountryInfo(countries[0]);
+    }
+    return drawCountryBlock(countries);
+  });
 };
-
-function drawCountryBlock({ name, flag }) {
-  const liCountry = document.createElement('li');
-  const imgCountry = document.createElement('img');
-  const linkCountry = document.createElement('a');
-
-  imgCountry.setAttribute('src', flag);
-  linkCountry.textContent = name;
-  liCountry.appendChild(imgCountry);
-  liCountry.appendChild(linkCountry);
-  countryList.appendChild(liCountry);
-}
 
 inputCountry.addEventListener('input', debounce(inputHandler, DEBOUNCE_DELAY));
