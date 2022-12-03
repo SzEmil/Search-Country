@@ -13,13 +13,14 @@ const drawCountryInfo = ({ name, capital, population, flags, languages }) => {
   const parsedlanguages = languages.map(lang => lang.name).join(', ');
   countryInformation.innerHTML = '';
   countryList.innerHTML = '';
-  countryInformation.innerHTML = `<img src="${flags.svg}"><a>${name}</a><a>${capital}</a><a>${population}</a><a>${parsedlanguages}</a>`;
+  countryInformation.innerHTML = `<div class = "country-info__box"><img class="img-info" src="${flags.svg}"><a class="country-info__title">${name}</a class ="country-info__link"></div><a class ="country-info__link"><span class ="country-info__span">Capital:</span> ${capital}</a><a class ="country-info__link"><span class ="country-info__span">Population:</span> ${population}</a><a class ="country-info__link"><span class ="country-info__span">Languages:</span> ${parsedlanguages}</a>`;
 };
 
 function drawCountryBlock(countries) {
   const countriesArray = countries.map(({ name, flags }) => {
     const countryCard = document.createElement('div');
-    countryCard.innerHTML = `<img src="${flags.svg}"><a>${name}</a>`;
+    countryCard.classList.add('card');
+    countryCard.innerHTML = `<img class="img-block" src="${flags.svg}"><a class="country-list-link">${name}</a>`;
 
     return countryCard;
   });
