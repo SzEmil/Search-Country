@@ -17,9 +17,11 @@ export function fetchUsers(countryName) {
     })
     .then(data => {
       console.log(data);
-      return data;
+      if (data.length > 0) {
+        return data;
+      }
     })
     .catch(error => {
-      Notiflix.Notify.failure('Oops, there is no country with that name');
+      console.error(error);
     });
 }
